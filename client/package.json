@@ -20,9 +20,11 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "@vueuse/core": "^14.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.562.0",
+    "maplibre-gl": "^5.15.0",
     "reka-ui": "^2.7.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",

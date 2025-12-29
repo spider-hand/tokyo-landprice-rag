@@ -1,11 +1,14 @@
-<script setup lang="ts"></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <SidebarProvider :default-open="true" style="--sidebar-width: 25rem" class="h-screen">
+    <ChatComponent />
+    <SidebarInset>
+      <MapComponent />
+    </SidebarInset>
+  </SidebarProvider>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import ChatComponent from './components/ChatComponent.vue'
+import MapComponent from '@/components/MapComponent.vue'
+</script>
