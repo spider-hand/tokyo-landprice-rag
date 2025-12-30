@@ -1,3 +1,5 @@
-cd client
-npx lint-staged
-npm run test:unit -- --run
+#!/usr/bin/env sh
+
+cd server && source .venv/bin/activate && pre-commit run --all-files && cd ..
+
+cd client && npx lint-staged && npm run test:unit -- --run

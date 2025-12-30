@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  tokyo-landprice-rag-api
+
+  Sample SAM Template for tokyo-landprice-rag-api
+
+Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
+  Function:
+    Timeout: 5
+    MemorySize: 128
+    Runtime: python3.14
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: geoguess-lite-api
+        POWERTOOLS_LOG_LEVEL: INFO
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - localstack
+      - dev
+      - prod
+    Default: localstack
+  SecretArn:
+    Type: String
+
+Resources:
+  HealthCheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: health.handler.lambda_handler
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+      Events:
+        HealthCheck:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: get
