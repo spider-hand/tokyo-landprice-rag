@@ -1,0 +1,40 @@
+post:
+  description: Send a message and receive a response
+  tags:
+    - messages
+  operationId: postMessage
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          title: PostMessageRequest
+          type: object
+          properties:
+            message:
+              type: string
+          required:
+            - message
+  responses:
+    "200":
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            title: PostMessageResponse
+            type: object
+            properties:
+              response:
+                type: string
+    default:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            title: ErrorResponse
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message

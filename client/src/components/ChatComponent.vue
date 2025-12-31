@@ -12,9 +12,15 @@
           v-model="userInput"
           placeholder="Type your message..."
           class="min-h-20 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
+          @keydown.enter.exact.prevent="sendMessage"
         />
         <div class="flex justify-end p-2">
-          <Button size="icon" class="rounded-full">
+          <Button
+            size="icon"
+            class="rounded-full"
+            :disabled="isLoading || !userInput.trim()"
+            @click="sendMessage"
+          >
             <ArrowRight />
           </Button>
         </div>
@@ -31,19 +37,51 @@ import SidebarContent from './ui/sidebar/SidebarContent.vue'
 import SidebarFooter from './ui/sidebar/SidebarFooter.vue'
 import SidebarHeader from './ui/sidebar/SidebarHeader.vue'
 import Textarea from './ui/textarea/Textarea.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import ChatMessageComponent from './ChatMessageComponent.vue'
+import { MessagesApi } from '@/services'
+import useApi from '@/composables/useApi'
+
+interface ChatMessage {
+  id: number
+  role: 'user' | 'agent'
+  content: string
+}
 
 const userInput = ref('')
+const messages = ref<ChatMessage[]>([])
+const isLoading = ref(false)
 
-const messages = ref([
-  { id: 1, role: 'agent', content: 'Hello! How can I help you today?' },
-  { id: 2, role: 'user', content: 'Can you show me information about land prices in Tokyo?' },
-  {
-    id: 3,
-    role: 'agent',
-    content:
-      'Sure! I can help you explore land price data in Tokyo. What specific area are you interested in?',
-  },
-])
+const nextMessageId = computed(() => messages.value.length)
+
+const { apiConfig } = useApi()
+const messagesApi = new MessagesApi(apiConfig)
+
+const sendMessage = async () => {
+  const message = userInput.value.trim()
+  if (!message || isLoading.value) return
+
+  messages.value.push({
+    id: nextMessageId.value,
+    role: 'user',
+    content: message,
+  })
+  userInput.value = ''
+  isLoading.value = true
+
+  try {
+    const response = await messagesApi.postMessage({
+      postMessageRequest: { message },
+    })
+    messages.value.push({
+      id: nextMessageId.value,
+      role: 'agent',
+      content: response.response ?? '',
+    })
+  } catch (error) {
+    console.error('Failed to send message:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>

@@ -5,7 +5,5 @@ info:
 paths:
   /health:
     $ref: ./paths/health.yml
-components:
-  schemas:
-    ErrorResponse:
-      $ref: ./components/schemas/error-response.yml
+  /messages:
+    $ref: ./paths/messages.yml

@@ -9,6 +9,7 @@ get:
       content:
         application/json:
           schema:
+            title: HealthCheckResponse
             type: object
             properties:
               message:
@@ -19,4 +20,10 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/error-response.yml
+            title: ErrorResponse
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message

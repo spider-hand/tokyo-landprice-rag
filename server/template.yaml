@@ -29,6 +29,14 @@ Parameters:
     Type: String
 
 Resources:
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
   HealthCheckFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -41,5 +49,21 @@ Resources:
         HealthCheck:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGateway
             Path: /health
             Method: get
+  MessagesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: messages.handler.lambda_handler
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+      Events:
+        PostMessage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGateway
+            Path: /messages
+            Method: post
