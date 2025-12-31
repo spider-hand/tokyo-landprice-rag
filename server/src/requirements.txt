@@ -2,6 +2,8 @@
 #    uv pip compile -o src/requirements.txt pyproject.toml
 annotated-types==0.7.0
     # via pydantic
+anyio==4.12.0
+    # via httpx
 aws-lambda-powertools==3.23.0
     # via server (pyproject.toml)
 boto3==1.42.18
@@ -11,22 +13,52 @@ botocore==1.42.18
     #   boto3
     #   s3transfer
 certifi==2025.11.12
-    # via requests
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
 charset-normalizer==3.4.4
     # via requests
+grpcio==1.76.0
+    # via qdrant-client
+h11==0.16.0
+    # via httpcore
+h2==4.3.0
+    # via httpx
+hpack==4.1.0
+    # via h2
+httpcore==1.0.9
+    # via httpx
+httpx==0.28.1
+    # via qdrant-client
+hyperframe==6.1.0
+    # via h2
 idna==3.11
-    # via requests
+    # via
+    #   anyio
+    #   httpx
+    #   requests
 jmespath==1.0.1
     # via
     #   aws-lambda-powertools
     #   boto3
     #   botocore
+numpy==2.4.0
+    # via qdrant-client
+portalocker==3.2.0
+    # via qdrant-client
+protobuf==6.33.2
+    # via qdrant-client
 pydantic==2.12.5
-    # via server (pyproject.toml)
+    # via
+    #   server (pyproject.toml)
+    #   qdrant-client
 pydantic-core==2.41.5
     # via pydantic
 python-dateutil==2.9.0.post0
     # via botocore
+qdrant-client==1.16.2
+    # via server (pyproject.toml)
 requests==2.32.5
     # via server (pyproject.toml)
 s3transfer==0.16.0
@@ -36,6 +68,7 @@ six==1.17.0
 typing-extensions==4.15.0
     # via
     #   aws-lambda-powertools
+    #   grpcio
     #   pydantic
     #   pydantic-core
     #   typing-inspection
@@ -44,4 +77,5 @@ typing-inspection==0.4.2
 urllib3==2.6.2
     # via
     #   botocore
+    #   qdrant-client
     #   requests
