@@ -6,7 +6,7 @@ from typing import TypedDict
 
 
 class SecretDict(TypedDict):
-    test: str
+    OPENAI_API_KEY: str
 
 
 @lru_cache(maxsize=1)
@@ -31,3 +31,6 @@ def get_secret() -> SecretDict:
         return json.loads(secret_string)
     except Exception as e:
         return {"error": str(e)}
+
+
+secrets = get_secret()

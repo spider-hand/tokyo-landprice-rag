@@ -2,6 +2,7 @@ from core.logger import logger
 from messages.model import PostMessageRequest, PostMessageResponse
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from core.qdrant import client, COLLECTION_NAME
+from core.openai import embed
 
 
 def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageResponse:
@@ -10,9 +11,11 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
 
         logger.info({"event": "validate_post_message_request", "body": body})
 
+        vector = embed(body.message)
+
         hits = client.query_points(
             collection_name=COLLECTION_NAME,
-            query=[0.1, 0.2, 0.3],
+            query=vector,
             limit=1,
         ).points
 
@@ -27,7 +30,7 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
             }
         )
 
-        return PostMessageResponse(response=hits[0].payload.get("text", ""))
+        return PostMessageResponse(response=hits[0].payload.get("area", ""))
     except Exception as e:
         logger.exception("Failed to post a message")
         raise e
