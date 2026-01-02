@@ -8,7 +8,7 @@
       </Avatar>
     </ItemMedia>
     <ItemContent>
-      <p class="text-sm">{{ message.content }}</p>
+      <p class="text-sm" v-html="renderedContent"></p>
     </ItemContent>
   </Item>
 </template>
@@ -20,11 +20,14 @@ import AvatarFallback from './ui/avatar/AvatarFallback.vue'
 import Item from './ui/item/Item.vue'
 import ItemContent from './ui/item/ItemContent.vue'
 import ItemMedia from './ui/item/ItemMedia.vue'
+import { micromark } from 'micromark'
 
-defineProps({
+const props = defineProps({
   message: {
     type: Object as PropType<{ id: number; role: string; content: string }>,
     required: true,
   },
 })
+
+const renderedContent = micromark(props.message.content)
 </script>
