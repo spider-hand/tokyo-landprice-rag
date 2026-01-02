@@ -31,27 +31,28 @@ onMounted(() => {
     map.on('load', () => {
       map!.addSource('land-price', {
         type: 'vector',
-        url: 'pmtiles://http://localhost:9000/tokyo-landprice-rag/land_price.pmtiles',
+        // @see: https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-L01-2025.html
+        url: 'pmtiles://http://localhost:9000/tokyo-landprice-rag/L01-25_13.pmtiles',
       })
 
       map!.addLayer({
         id: 'land-price-layer',
         type: 'circle',
         source: 'land-price',
-        'source-layer': 'land_price',
+        'source-layer': 'L0125_13',
         paint: {
           'circle-radius': 5,
           'circle-color': [
             'step',
-            ['get', 'L01_006'],
+            ['get', 'L01_008'],
             COLOR_PALETTE[0] as string,
-            215000,
+            228800,
             COLOR_PALETTE[1] as string,
-            370000,
+            409600,
             COLOR_PALETTE[2] as string,
-            579000,
+            666400,
             COLOR_PALETTE[3] as string,
-            1040000,
+            1250000,
             COLOR_PALETTE[4] as string,
           ],
           'circle-opacity': 0.8,
