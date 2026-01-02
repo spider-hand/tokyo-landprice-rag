@@ -8,4 +8,5 @@ dependencies = [
     "openai>=2.14.0",
     "python-dotenv>=1.2.1",
     "qdrant-client>=1.16.2",
+    "tqdm>=4.67.1",
 ]

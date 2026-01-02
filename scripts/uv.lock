@@ -360,6 +360,7 @@ dependencies = [
     { name = "openai" },
     { name = "python-dotenv" },
     { name = "qdrant-client" },
+    { name = "tqdm" },
 ]
 
 [package.metadata]
@@ -367,6 +368,7 @@ requires-dist = [
     { name = "openai", specifier = ">=2.14.0" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "qdrant-client", specifier = ">=1.16.2" },
+    { name = "tqdm", specifier = ">=4.67.1" },
 ]
 
 [[package]]

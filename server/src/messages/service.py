@@ -16,21 +16,23 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
         hits = client.query_points(
             collection_name=COLLECTION_NAME,
             query=vector,
-            limit=1,
+            limit=5,
         ).points
 
         if not hits:
             logger.info({"event": "no_relevant_information_found"})
             return PostMessageResponse(response="No relevant information found.")
 
-        logger.info(
-            {
-                "event": "found_relevant_information",
-                "hit": hits[0],
-            }
-        )
+        for hit in hits:
+            logger.info(
+                {
+                    "event": "retrieved_relevant_information",
+                    "score": hit.score,
+                    "text": hit.payload.get("text", ""),
+                }
+            )
 
-        return PostMessageResponse(response=hits[0].payload.get("area", ""))
+        return PostMessageResponse(response=hits[0].payload.get("text", ""))
     except Exception as e:
         logger.exception("Failed to post a message")
         raise e
