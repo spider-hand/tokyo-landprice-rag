@@ -12,7 +12,9 @@
           v-model="userInput"
           placeholder="Type your message..."
           class="min-h-20 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
-          @keydown.enter.exact.prevent="sendMessage"
+          @keydown="handleKeydown"
+          @compositionstart="isComposing = true"
+          @compositionend="isComposing = false"
         />
         <div class="flex justify-end p-2">
           <Button
@@ -51,11 +53,21 @@ interface ChatMessage {
 const userInput = ref('')
 const messages = ref<ChatMessage[]>([])
 const isLoading = ref(false)
+// To handle IME composition events
+const isComposing = ref(false)
 
 const nextMessageId = computed(() => messages.value.length)
 
 const { apiConfig } = useApi()
 const messagesApi = new MessagesApi(apiConfig)
+
+const handleKeydown = (event: KeyboardEvent) => {
+  // Prevent the message from being sent when composing text with an IME
+  if (event.key === 'Enter' && !event.shiftKey && !isComposing.value) {
+    event.preventDefault()
+    sendMessage()
+  }
+}
 
 const sendMessage = async () => {
   const message = userInput.value.trim()
