@@ -6,6 +6,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from typing import TypedDict
 from tqdm import tqdm
+import mapclassify
 
 
 class KnowledgeDict(TypedDict):
@@ -36,48 +37,6 @@ BATCH_SIZE = 2048
 
 openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
-
-
-def get_price_tier(price: int) -> int:
-    """Returns a tier based on quantiles of land price in Tokyo."""
-    if price < 228800:
-        return 1
-    elif price < 409600:
-        return 2
-    elif price < 666400:
-        return 3
-    elif price < 1250000:
-        return 4
-    else:
-        return 5
-
-
-def get_change_rate_tier(change_rate: float) -> int:
-    """Returns a tier based on quantiles of land price change rate in Tokyo."""
-    if change_rate < 3.2:
-        return 1
-    elif change_rate < 5.2:
-        return 2
-    elif change_rate < 7.5:
-        return 3
-    elif change_rate < 11.32:
-        return 4
-    else:
-        return 5
-
-
-def get_distance_to_station_tier(distance: int) -> int:
-    """Returns a tier based on quantiles of distance to nearest station in Tokyo."""
-    if distance < 252:
-        return 1
-    elif distance < 484:
-        return 2
-    elif distance < 750:
-        return 3
-    elif distance < 1200:
-        return 4
-    else:
-        return 5
 
 
 def build_embedding_input(k: KnowledgeDict) -> str:
@@ -162,6 +121,12 @@ def main():
     # Prepare data
     prices = np.array([f["properties"]["L01_008"] for f in features])
     change_rates = np.array([f["properties"]["L01_009"] for f in features])
+    distances = np.array([f["properties"]["L01_050"] for f in features])
+
+    # Create classifiers using Quantiles (5 classes)
+    price_classifier = mapclassify.Quantiles(prices, k=5)
+    change_rate_classifier = mapclassify.Quantiles(change_rates, k=5)
+    distance_classifier = mapclassify.Quantiles(distances, k=5)
 
     price_min, price_max = prices.min(), prices.max()
     change_rate_min, change_rate_max = change_rates.min(), change_rates.max()
@@ -174,7 +139,7 @@ def main():
 
     data_items = []
 
-    for feature in tqdm(features, desc="Preparing data"):
+    for idx, feature in enumerate(tqdm(features, desc="Preparing data")):
         prop = feature["properties"]
         lng, lat = feature["geometry"]["coordinates"]
         price = prop["L01_008"]
@@ -184,18 +149,20 @@ def main():
         station = prop["L01_048"]
         distance_to_station = prop["L01_050"]
 
+        price_tier = int(price_classifier.yb[idx]) + 1
+        change_rate_tier = int(change_rate_classifier.yb[idx]) + 1
+        distance_tier = int(distance_classifier.yb[idx]) + 1
+
         knowledge = {
-            "price_tier": get_price_tier(price),
-            "change_rate_tier": get_change_rate_tier(change_rate),
+            "price_tier": price_tier,
+            "change_rate_tier": change_rate_tier,
             "ward": ward,
             "address": prop["L01_025"],
             "usage": usage,
             "usage_detail": prop["L01_029"],
             "surrounding_detail": prop["L01_047"],
             "station": station,
-            "distance_to_station_tier": get_distance_to_station_tier(
-                distance_to_station
-            ),
+            "distance_to_station_tier": distance_tier,
         }
 
         embedding_input = build_embedding_input(knowledge)
