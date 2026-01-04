@@ -14,7 +14,7 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
       - x86_64
     Environment:
       Variables:
-        POWERTOOLS_SERVICE_NAME: geoguess-lite-api
+        POWERTOOLS_SERVICE_NAME: tokyo-landprice-rag-api
         POWERTOOLS_LOG_LEVEL: INFO
 
 Parameters:
