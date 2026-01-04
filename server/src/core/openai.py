@@ -65,7 +65,8 @@ def extract_intent(question: str) -> SearchIntent:
 
 def generate_with_llm(question: str, contexts: list[str]) -> str:
     prompt = f"""
-        以下の情報を参考に、日本語で質問に答えてください。
+        以下の情報を参考に、質問に答えてください。
+        質問文が日本語でない場合は、英語で回答してください。
         事実に基づいて簡潔に説明してください。
         推測はしないでください。
 
