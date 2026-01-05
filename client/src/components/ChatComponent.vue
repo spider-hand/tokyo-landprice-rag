@@ -3,7 +3,7 @@
     <SidebarHeader>
       <h1 class="text-lg font-semibold">Tokyo Land Price RAG</h1>
     </SidebarHeader>
-    <SidebarContent>
+    <SidebarContent ref="chatContainer">
       <ChatMessageComponent v-for="message in messages" :key="message.id" :message="message" />
     </SidebarContent>
     <SidebarFooter>
@@ -39,7 +39,7 @@ import SidebarContent from './ui/sidebar/SidebarContent.vue'
 import SidebarFooter from './ui/sidebar/SidebarFooter.vue'
 import SidebarHeader from './ui/sidebar/SidebarHeader.vue'
 import Textarea from './ui/textarea/Textarea.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import ChatMessageComponent from './ChatMessageComponent.vue'
 import { MessagesApi } from '@/services'
 import useApi from '@/composables/useApi'
@@ -55,6 +55,7 @@ const messages = ref<ChatMessage[]>([])
 const isLoading = ref(false)
 // To handle IME composition events
 const isComposing = ref(false)
+const chatContainer = ref<InstanceType<typeof SidebarContent> | null>(null)
 
 const nextMessageId = computed(() => messages.value.length)
 
@@ -66,6 +67,17 @@ const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Enter' && !event.shiftKey && !isComposing.value) {
     event.preventDefault()
     sendMessage()
+  }
+}
+
+const scrollToBottom = async () => {
+  await nextTick()
+  const el = chatContainer.value?.$el as HTMLElement | undefined
+  if (el) {
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: 'smooth',
+    })
   }
 }
 
@@ -81,6 +93,8 @@ const sendMessage = async () => {
   userInput.value = ''
   isLoading.value = true
 
+  scrollToBottom()
+
   try {
     const response = await messagesApi.postMessage({
       postMessageRequest: { message },
@@ -90,6 +104,8 @@ const sendMessage = async () => {
       role: 'agent',
       content: response.response ?? '',
     })
+
+    scrollToBottom()
   } catch (error) {
     console.error('Failed to send message:', error)
   } finally {
