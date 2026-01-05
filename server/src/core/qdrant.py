@@ -1,5 +1,5 @@
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Filter, FieldCondition, MatchValue
+from qdrant_client.http.models import Filter, FieldCondition, MatchValue, Range
 from typing import TypedDict, Optional
 
 client = QdrantClient(host="host.docker.internal", port=6333)
@@ -11,6 +11,7 @@ class SearchIntent(TypedDict, total=False):
     ward: str
     station: str
     usage: str
+    time_to_station_max: int
 
     require_max_price: bool
     require_min_price: bool
@@ -57,6 +58,14 @@ def build_filter(intent: SearchIntent) -> Optional[Filter]:
             FieldCondition(
                 key="land_usage",
                 match=MatchValue(value=intent["land_usage"]),
+            )
+        )
+
+    if intent.get("time_to_station_max"):
+        must.append(
+            FieldCondition(
+                key="time_to_station",
+                range=Range(lte=intent["time_to_station_max"]),
             )
         )
 

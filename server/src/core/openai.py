@@ -25,6 +25,7 @@ def extract_intent(question: str) -> SearchIntent:
         - ward 市区町村は含めない（例: 千代田)
         - station 駅名のみ（例: 半蔵門)
         - usage 住宅, 店舗, 事務所, 銀行, 旅館, 給油所, 工場, 倉庫, 農地, 山林, 医院, 空地, 作業所, 原野, 用材, 雑林のいずれか
+        - time_to_station_max: 駅から徒歩何分以内という条件があれば、その分数を整数で検索条件に含める
 
         - require_max_price: 最高価格を検索条件に含めるなら true
         - require_min_price: 最低価格を検索条件に含めるなら true

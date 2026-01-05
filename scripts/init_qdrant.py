@@ -7,17 +7,20 @@ from dotenv import load_dotenv
 from typing import TypedDict
 from tqdm import tqdm
 import mapclassify
+import math
+import re
 
 
 class KnowledgeDict(TypedDict):
+    price: int
     price_tier: int
     change_rate_tier: int
-    ward: str
     address: str
     usage: str
     usage_detail: str
     surrounding_detail: str
     station: str
+    distance_to_station: int
     distance_to_station_tier: int
 
 
@@ -41,14 +44,49 @@ client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
 def build_embedding_input(k: KnowledgeDict) -> str:
 
-    def build_price_tier_text(tier: int) -> str:
-        return {
-            5: "地価が非常に高いエリアです。",
-            4: "地価が高いエリアです。",
-            3: "地価は平均的な水準です。",
-            2: "地価は比較的抑えられています。",
-            1: "地価が低めのエリアです。",
+    def clean_address_text(address: str) -> str:
+        """
+        Normalize address.
+
+        ex.
+        東京都　千代田区紀尾井町３番２７ → 東京都　千代田区紀尾井町
+        東京都　千代田区富士見１丁目８番６ → 東京都　千代田区富士見１丁目
+        """
+
+        # If 丁目 exists, cut after it
+        if "丁目" in address:
+            return re.sub(r"(.*?丁目).*", r"\1", address).strip()
+
+        # Otherwise, remove everything after the first number
+        address = re.split(r"[0-9０-９]", address, maxsplit=1)[0]
+        return address.strip()
+
+    def build_price_man_yen_range_text(price: int) -> str:
+        man_yen = price // 10_000
+
+        if man_yen < 100:
+            bucket = (man_yen // 10) * 10
+
+            if bucket == 0:
+                return "(10万円未満)"
+
+            return f"({bucket}万円台)"
+
+        bucket = (man_yen // 100) * 100
+        return f"({bucket}万円台)"
+
+    def build_price_tier_text(tier: int, price: int) -> str:
+        tier_text = {
+            5: "地価が非常に高いエリアです",
+            4: "地価が高いエリアです",
+            3: "地価は平均的な水準です",
+            2: "地価は比較的抑えられています",
+            1: "地価が低めのエリアです",
         }.get(tier, "")
+
+        price_text = build_price_man_yen_range_text(price)
+
+        return f"{tier_text}{price_text}。"
 
     def build_change_rate_tier_text(tier: int) -> str:
         return {
@@ -59,24 +97,38 @@ def build_embedding_input(k: KnowledgeDict) -> str:
             1: "地価は下落傾向にあります。",
         }.get(tier, "")
 
-    def build_distance_to_station_tier_text(tier: int) -> str:
-        return {
-            1: "駅から非常に近く、利便性の高い立地です。",
-            2: "駅から近く、徒歩圏内の立地です。",
-            3: "駅まで徒歩でアクセス可能な立地です。",
-            4: "駅からやや距離があります。",
-            5: "駅から距離があり、落ち着いた立地です。",
+    def build_time_to_station_text(distance: int) -> str:
+        minutes = distance / 80
+        if minutes < 1:
+            return "(徒歩1分未満)"
+        else:
+            return f"(徒歩{int(math.ceil(minutes))}分程度)"
+
+    def build_distance_to_station_tier_text(tier: int, distance: int) -> str:
+        tier_text = {
+            1: "駅から非常に近く、利便性の高い立地です",
+            2: "駅から近く、徒歩でのアクセスがしやすい立地です",
+            3: "駅から徒歩圏内であり、距離としては標準的な立地です",
+            4: "駅からやや距離があり、徒歩では少し不便な立地です",
+            5: "駅から距離があり、公共交通の利用が必要な立地です",
         }.get(tier, "")
+
+        time_text = build_time_to_station_text(distance)
+
+        return f"{tier_text}{time_text}。"
 
     parts: list[str] = []
 
     # Location
-    parts.append(f"この土地は東京都{k['ward']}に位置しています。")
-    parts.append(f"住所は{k['address']}です。")
+    parts.append(f"この土地は{clean_address_text(k['address'])}です。")
 
     # Station
     parts.append(f"最寄り駅は{k['station']}です。")
-    parts.append(build_distance_to_station_tier_text(k["distance_to_station_tier"]))
+    parts.append(
+        build_distance_to_station_tier_text(
+            distance=k["distance_to_station"], tier=k["distance_to_station_tier"]
+        )
+    )
 
     # Usage
     parts.append(f"土地は{k['usage']}として利用されています。")
@@ -84,7 +136,7 @@ def build_embedding_input(k: KnowledgeDict) -> str:
     parts.append(f"周辺環境は{k['surrounding_detail']}となっています。")
 
     # Value
-    parts.append(build_price_tier_text(k["price_tier"]))
+    parts.append(build_price_tier_text(price=k["price"], tier=k["price_tier"]))
     parts.append(build_change_rate_tier_text(k["change_rate_tier"]))
 
     return "\n".join(parts)
@@ -154,14 +206,15 @@ def main():
         distance_tier = int(distance_classifier.yb[idx]) + 1
 
         knowledge = {
+            "price": price,
             "price_tier": price_tier,
             "change_rate_tier": change_rate_tier,
-            "ward": ward,
             "address": prop["L01_025"],
             "usage": usage,
             "usage_detail": prop["L01_029"],
             "surrounding_detail": prop["L01_047"],
             "station": station,
+            "distance_to_station": distance_to_station,
             "distance_to_station_tier": distance_tier,
         }
 
@@ -181,7 +234,9 @@ def main():
                 (change_rates < change_rate).sum() / len(change_rates) * 100
             ),
             "is_top_1_percent_change_rate": bool(change_rate >= change_rate_top_1),
-            "is_bottom_1_percent_change_rate": bool(change_rate <= change_rate_bottom_1),
+            "is_bottom_1_percent_change_rate": bool(
+                change_rate <= change_rate_bottom_1
+            ),
             "is_max_change_rate": bool(change_rate == change_rate_max),
             "is_min_change_rate": bool(change_rate == change_rate_min),
             "ward": ward,
@@ -189,6 +244,7 @@ def main():
             "usage": usage,
             "distance_to_station": distance_to_station,
             "distance_to_station_tier": knowledge["distance_to_station_tier"],
+            "time_to_station": int(math.ceil(distance_to_station / 80)),
             "lat": lat,
             "lng": lng,
             "semantic_text": embedding_input,
@@ -210,9 +266,7 @@ def main():
     # Create points with embeddings and payloads
     points = []
 
-    for idx, payload in enumerate(
-        tqdm(data_items, desc="Creating points")
-    ):
+    for idx, payload in enumerate(tqdm(data_items, desc="Creating points")):
         vector = all_vectors[idx]
         point = models.PointStruct(
             id=idx,
