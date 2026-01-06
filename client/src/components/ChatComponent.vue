@@ -5,6 +5,11 @@
     </SidebarHeader>
     <SidebarContent ref="chatContainer">
       <ChatMessageComponent v-for="message in messages" :key="message.id" :message="message" />
+      <div v-if="isLoading" class="flex items-center p-4">
+        <div class="flex items-center justify-center h-8 w-8">
+          <Circle class="h-2 w-2 animate-ping fill-current" />
+        </div>
+      </div>
     </SidebarContent>
     <SidebarFooter>
       <div class="flex flex-col rounded-md border border-input bg-background shadow-xs">
@@ -43,6 +48,7 @@ import { computed, ref, nextTick } from 'vue'
 import ChatMessageComponent from './ChatMessageComponent.vue'
 import { MessagesApi } from '@/services'
 import useApi from '@/composables/useApi'
+import { Circle } from 'lucide-vue-next'
 
 interface ChatMessage {
   id: number

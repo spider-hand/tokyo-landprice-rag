@@ -1,13 +1,14 @@
 <template>
-  <Item variant="muted" size="sm" class="items-start">
+  <Item size="sm" class="items-start">
     <ItemMedia>
       <Avatar>
-        <AvatarFallback>
-          {{ message.role === 'user' ? 'U' : 'A' }}
+        <AvatarFallback class="bg-muted">
+          <User v-if="message.role === 'user'" />
+          <Bot v-else />
         </AvatarFallback>
       </Avatar>
     </ItemMedia>
-    <ItemContent>
+    <ItemContent class="bg-muted p-3 rounded-2xl">
       <p class="text-sm" v-html="renderedContent"></p>
     </ItemContent>
   </Item>
@@ -21,6 +22,7 @@ import Item from './ui/item/Item.vue'
 import ItemContent from './ui/item/ItemContent.vue'
 import ItemMedia from './ui/item/ItemMedia.vue'
 import { micromark } from 'micromark'
+import { User, Bot } from 'lucide-vue-next'
 
 const props = defineProps({
   message: {
