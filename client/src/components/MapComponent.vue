@@ -54,7 +54,7 @@ onMounted(() => {
       container: mapContainer.value,
       // @see: https://docs.carto.com/faqs/carto-basemaps
       style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-      center: [139.6917, 35.6895], // Tokyo
+      center: [139.5803, 35.7023], // Tokyo
       zoom: 10,
     })
 
