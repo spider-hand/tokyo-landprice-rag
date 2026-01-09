@@ -19,6 +19,11 @@ post:
               type: number
             is_point:
               type: boolean
+            language:
+              type: string
+              enum:
+                - en
+                - ja
           required:
             - message
   responses:

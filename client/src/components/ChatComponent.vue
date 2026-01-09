@@ -1,7 +1,14 @@
 <template>
   <Sidebar collapsible="none">
     <SidebarHeader>
-      <h1 class="text-lg font-semibold">Tokyo Land Price RAG</h1>
+      <div class="flex items-center justify-between">
+        <h1 class="text-lg font-semibold">Tokyo Land Price RAG</h1>
+        <div class="flex items-center gap-2">
+          <span class="text-sm">EN</span>
+          <Switch v-model="isJapanese" />
+          <span class="text-sm">JP</span>
+        </div>
+      </div>
     </SidebarHeader>
     <SidebarContent ref="chatContainer">
       <ChatMessageComponent v-for="message in messages" :key="message.id" :message="message" />
@@ -15,7 +22,7 @@
       <div class="flex flex-col rounded-md border border-input bg-background shadow-xs">
         <Textarea
           v-model="userInput"
-          placeholder="Type your message..."
+          :placeholder="t.placeholder"
           class="min-h-20 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
           @keydown="handleKeydown"
           @compositionstart="isComposing = true"
@@ -48,8 +55,10 @@ import { computed, ref, nextTick } from 'vue'
 import ChatMessageComponent from './ChatMessageComponent.vue'
 import { MessagesApi } from '@/services'
 import useApi from '@/composables/useApi'
+import useLanguage from '@/composables/useLanguage'
 import { Circle } from 'lucide-vue-next'
 import type { MapClickEvent } from './MapComponent.vue'
+import { Switch } from './ui/switch'
 
 interface ChatMessage {
   id: number
@@ -68,6 +77,8 @@ const nextMessageId = computed(() => messages.value.length)
 
 const { apiConfig } = useApi()
 const messagesApi = new MessagesApi(apiConfig)
+
+const { isJapanese, t, code } = useLanguage()
 
 const handleKeydown = (event: KeyboardEvent) => {
   // Prevent the message from being sent when composing text with an IME
@@ -109,6 +120,7 @@ const sendMessage = async (event?: MapClickEvent) => {
         lat: event?.lat,
         lon: event?.lon,
         isPoint: event?.isPoint,
+        language: code.value,
       },
     })
     messages.value.push({
@@ -128,9 +140,7 @@ const sendMessage = async (event?: MapClickEvent) => {
 const sendMapQuery = (event: MapClickEvent) => {
   if (isLoading.value) return
 
-  const message = event.isPoint
-    ? `この地点について教えてください。`
-    : `この周辺エリアについて教えてください。`
+  const message = event.isPoint ? t.value.pointQuery : t.value.areaQuery
 
   userInput.value = message
 

@@ -7,6 +7,7 @@ class PostMessageRequest(BaseModel):
     lat: Optional[float] = None
     lon: Optional[float] = None
     is_point: Optional[bool] = None
+    language: Optional[str] = "en"
 
 
 class PostMessageResponse(BaseModel):

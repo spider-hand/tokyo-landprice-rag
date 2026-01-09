@@ -43,7 +43,23 @@ export interface PostMessageRequest {
    * @memberof PostMessageRequest
    */
   isPoint?: boolean
+  /**
+   *
+   * @type {string}
+   * @memberof PostMessageRequest
+   */
+  language?: PostMessageRequestLanguageEnum
 }
+
+/**
+ * @export
+ */
+export const PostMessageRequestLanguageEnum = {
+  En: 'en',
+  Ja: 'ja',
+} as const
+export type PostMessageRequestLanguageEnum =
+  (typeof PostMessageRequestLanguageEnum)[keyof typeof PostMessageRequestLanguageEnum]
 
 /**
  * Check if a given object implements the PostMessageRequest interface.
@@ -69,6 +85,7 @@ export function PostMessageRequestFromJSONTyped(
     lat: json['lat'] == null ? undefined : json['lat'],
     lon: json['lon'] == null ? undefined : json['lon'],
     isPoint: json['is_point'] == null ? undefined : json['is_point'],
+    language: json['language'] == null ? undefined : json['language'],
   }
 }
 
@@ -89,5 +106,6 @@ export function PostMessageRequestToJSONTyped(
     lat: value['lat'],
     lon: value['lon'],
     is_point: value['isPoint'],
+    language: value['language'],
   }
 }

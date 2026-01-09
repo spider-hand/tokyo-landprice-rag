@@ -12,6 +12,7 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
         lat = body.lat
         lon = body.lon
         is_point = body.is_point
+        language = body.language
 
         logger.info({"event": "validate_post_message_request", "body": body})
 
@@ -47,7 +48,14 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
         ).points
 
         if not hits:
-            return PostMessageResponse(response="関連する情報が見つかりませんでした。")
+            if language == "ja":
+                return PostMessageResponse(
+                    response="関連する情報が見つかりませんでした。"
+                )
+            else:
+                return PostMessageResponse(
+                    response="No relevant information was found."
+                )
 
         # Build contexts
         contexts = []
