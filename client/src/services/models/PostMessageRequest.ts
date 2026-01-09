@@ -25,6 +25,24 @@ export interface PostMessageRequest {
    * @memberof PostMessageRequest
    */
   message: string
+  /**
+   *
+   * @type {number}
+   * @memberof PostMessageRequest
+   */
+  lat?: number
+  /**
+   *
+   * @type {number}
+   * @memberof PostMessageRequest
+   */
+  lon?: number
+  /**
+   *
+   * @type {boolean}
+   * @memberof PostMessageRequest
+   */
+  isPoint?: boolean
 }
 
 /**
@@ -48,6 +66,9 @@ export function PostMessageRequestFromJSONTyped(
   }
   return {
     message: json['message'],
+    lat: json['lat'] == null ? undefined : json['lat'],
+    lon: json['lon'] == null ? undefined : json['lon'],
+    isPoint: json['is_point'] == null ? undefined : json['is_point'],
   }
 }
 
@@ -65,5 +86,8 @@ export function PostMessageRequestToJSONTyped(
 
   return {
     message: value['message'],
+    lat: value['lat'],
+    lon: value['lon'],
+    is_point: value['isPoint'],
   }
 }

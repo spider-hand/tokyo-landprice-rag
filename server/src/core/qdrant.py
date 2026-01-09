@@ -1,10 +1,20 @@
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Filter, FieldCondition, MatchValue, Range
+from qdrant_client.http.models import (
+    Filter,
+    FieldCondition,
+    MatchValue,
+    Range,
+    GeoBoundingBox,
+    GeoPoint,
+)
 from typing import TypedDict, Optional
 
 client = QdrantClient(host="host.docker.internal", port=6333)
 
 COLLECTION_NAME = "tokyo_landprice_rag"
+
+METERS_PER_DEG_LAT = 111000
+METERS_PER_DEG_LON = 91000
 
 
 class SearchIntent(TypedDict, total=False):
@@ -97,3 +107,22 @@ def build_filter(intent: SearchIntent) -> Optional[Filter]:
         return None
 
     return Filter(must=must)
+
+
+def build_geo_filter(lat: float, lon: float, bbox_size_meters: float = 500) -> Filter:
+    half_size_lat = (bbox_size_meters / 2) / METERS_PER_DEG_LAT
+    half_size_lon = (bbox_size_meters / 2) / METERS_PER_DEG_LON
+
+    return Filter(
+        must=[
+            FieldCondition(
+                key="location",
+                geo_bounding_box=GeoBoundingBox(
+                    top_left=GeoPoint(lat=lat + half_size_lat, lon=lon - half_size_lon),
+                    bottom_right=GeoPoint(
+                        lat=lat - half_size_lat, lon=lon + half_size_lon
+                    ),
+                ),
+            ),
+        ]
+    )

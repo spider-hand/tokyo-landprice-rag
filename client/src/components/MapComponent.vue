@@ -24,6 +24,17 @@ import * as pmtiles from 'pmtiles'
 import ItemGroup from './ui/item/ItemGroup.vue'
 import Item from './ui/item/Item.vue'
 
+export interface MapClickEvent {
+  lat: number
+  lon: number
+  isPoint: boolean
+  address?: string
+}
+
+const emit = defineEmits<{
+  mapClick: [event: MapClickEvent]
+}>()
+
 const COLOR_PALETTE = [
   'rgb(153, 102, 255)',
   'rgb(54, 162, 235)',
@@ -92,6 +103,40 @@ onMounted(() => {
           'circle-stroke-color': '#ffffff',
           'circle-stroke-opacity': 0.2,
         },
+      })
+
+      map!.on('mouseenter', 'land-price-layer', () => {
+        map!.getCanvas().style.cursor = 'pointer'
+      })
+
+      map!.on('mouseleave', 'land-price-layer', () => {
+        map!.getCanvas().style.cursor = ''
+      })
+
+      map!.on('click', (e) => {
+        const features = map!.queryRenderedFeatures(e.point, {
+          layers: ['land-price-layer'],
+        })
+
+        if (features.length > 0) {
+          // Handle click on a point feature
+          const feature = features[0]!
+          const geometry = feature.geometry as GeoJSON.Point
+          const coordinates = geometry.coordinates
+          emit('mapClick', {
+            lat: coordinates[1] as number,
+            lon: coordinates[0] as number,
+            isPoint: true,
+            address: feature.properties?.L01_025 as string | undefined,
+          })
+        } else {
+          // Handle click on a non-feature area
+          emit('mapClick', {
+            lat: e.lngLat.lat,
+            lon: e.lngLat.lng,
+            isPoint: false,
+          })
+        }
       })
     })
   }

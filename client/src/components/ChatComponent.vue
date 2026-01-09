@@ -49,6 +49,7 @@ import ChatMessageComponent from './ChatMessageComponent.vue'
 import { MessagesApi } from '@/services'
 import useApi from '@/composables/useApi'
 import { Circle } from 'lucide-vue-next'
+import type { MapClickEvent } from './MapComponent.vue'
 
 interface ChatMessage {
   id: number
@@ -87,7 +88,7 @@ const scrollToBottom = async () => {
   }
 }
 
-const sendMessage = async () => {
+const sendMessage = async (event?: MapClickEvent) => {
   const message = userInput.value.trim()
   if (!message || isLoading.value) return
 
@@ -103,7 +104,12 @@ const sendMessage = async () => {
 
   try {
     const response = await messagesApi.postMessage({
-      postMessageRequest: { message },
+      postMessageRequest: {
+        message,
+        lat: event?.lat,
+        lon: event?.lon,
+        isPoint: event?.isPoint,
+      },
     })
     messages.value.push({
       id: nextMessageId.value,
@@ -118,4 +124,20 @@ const sendMessage = async () => {
     isLoading.value = false
   }
 }
+
+const sendMapQuery = (event: MapClickEvent) => {
+  if (isLoading.value) return
+
+  const message = event.isPoint
+    ? `この地点について教えてください。`
+    : `この周辺エリアについて教えてください。`
+
+  userInput.value = message
+
+  sendMessage(event)
+}
+
+defineExpose({
+  sendMapQuery,
+})
 </script>

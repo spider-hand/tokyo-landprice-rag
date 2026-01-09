@@ -193,7 +193,7 @@ def main():
 
     for idx, feature in enumerate(tqdm(features, desc="Preparing data")):
         prop = feature["properties"]
-        lng, lat = feature["geometry"]["coordinates"]
+        lon, lat = feature["geometry"]["coordinates"]
         price = prop["L01_008"]
         change_rate = prop["L01_009"]
         ward = prop["L01_024"]
@@ -245,8 +245,7 @@ def main():
             "distance_to_station": distance_to_station,
             "distance_to_station_tier": knowledge["distance_to_station_tier"],
             "time_to_station": int(math.ceil(distance_to_station / 80)),
-            "lat": lat,
-            "lng": lng,
+            "location": {"lat": lat, "lon": lon},
             "semantic_text": embedding_input,
         }
 
