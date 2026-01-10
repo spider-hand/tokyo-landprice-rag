@@ -2,7 +2,7 @@
   <Sidebar collapsible="none">
     <SidebarHeader>
       <div class="flex items-center justify-between">
-        <h1 class="text-lg font-semibold">Tokyo Land Price RAG</h1>
+        <h1 class="text-lg font-semibold">Tokyo Land Price AI</h1>
         <div class="flex items-center gap-2">
           <span class="text-sm">EN</span>
           <Switch v-model="isJapanese" />
