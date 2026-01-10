@@ -39,6 +39,19 @@
           </Button>
         </div>
       </div>
+      <div class="flex gap-1">
+        <span class="text-[10px] text-muted-foreground"
+          >Tokyo Land Price AI © {{ new Date().getFullYear() }} Akinori Hoshina</span
+        >
+        <span class="text-[10px] text-muted-foreground">·</span>
+        <a
+          href="https://github.com/spider-hand/tokyo-landprice-rag"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-[10px] text-blue-400"
+          >GitHub</a
+        >
+      </div>
     </SidebarFooter>
   </Sidebar>
 </template>
