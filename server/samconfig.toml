@@ -3,7 +3,7 @@
 version = 0.1
 
 [default.global.parameters]
-stack_name = "server"
+stack_name = "tokyo-landprice-rag-api"
 
 [default.build.parameters]
 cached = true

@@ -7,8 +7,6 @@ Description: >
 
 Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
   Function:
-    Timeout: 30
-    MemorySize: 128
     Runtime: python3.14
     Architectures:
       - x86_64
@@ -22,7 +20,6 @@ Parameters:
     Type: String
     AllowedValues:
       - localstack
-      - dev
       - prod
     Default: localstack
   SecretArn:
@@ -42,9 +39,14 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: health.handler.lambda_handler
+      Timeout: 30
+      MemorySize: 128
       Environment:
         Variables:
           Environment: !Ref Environment
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref SecretArn
       Events:
         HealthCheck:
           Type: Api
@@ -57,9 +59,14 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: messages.handler.lambda_handler
+      Timeout: 60
+      MemorySize: 512
       Environment:
         Variables:
           Environment: !Ref Environment
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref SecretArn
       Events:
         PostMessage:
           Type: Api

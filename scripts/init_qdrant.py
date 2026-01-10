@@ -1,3 +1,4 @@
+import argparse
 import os
 import json
 import numpy as np
@@ -24,22 +25,36 @@ class KnowledgeDict(TypedDict):
     distance_to_station_tier: int
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--env", choices=["localstack", "prod"], default="localstack")
+args = parser.parse_args()
+
+env = args.env
+
 # Load environment variables
-load_dotenv()
+if env == "localstack":
+    load_dotenv(".env.localstack")
+else:
+    load_dotenv(".env.prod")
 
 # Configuration
 COLLECTION_NAME = "tokyo_landprice_rag"
 GEOJSON_PATH = "data/L01-25_13.geojson"
-
-QDRANT_HOST = "localhost"
-QDRANT_PORT = 6333
-
 EMBED_MODEL = "text-embedding-3-small"
 VECTOR_SIZE = 1536
 BATCH_SIZE = 2048
 
 openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+
+if env == "localstack":
+    client = QdrantClient(host="localhost", port=6333)
+else:
+    client = QdrantClient(
+        api_key=os.getenv("QDRANT_API_KEY"),
+        host=os.getenv("QDRANT_HOST"),
+        port=443,
+        check_compatibility=False,
+    )
 
 
 def build_embedding_input(k: KnowledgeDict) -> str:

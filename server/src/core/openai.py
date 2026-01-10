@@ -5,7 +5,7 @@ from .qdrant import SearchIntent
 from .logger import logger
 
 
-openai = OpenAI(api_key=secrets.get("OPENAI_API_KEY"))
+openai = OpenAI(api_key=secrets["OPENAI_API_KEY"])
 
 
 def embed(text: str) -> list[float]:

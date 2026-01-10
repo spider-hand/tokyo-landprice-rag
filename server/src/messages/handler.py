@@ -3,6 +3,7 @@ from aws_lambda_powertools.utilities.parser import event_parser
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from core.logger import dynamic_inject_lambda_context, logger
 from messages.service import post_message_service
+from core.auth import CORS_HEADERS
 
 
 @dynamic_inject_lambda_context
@@ -14,8 +15,6 @@ def lambda_handler(event: APIGatewayProxyEventModel, context: LambdaContext):
 
     return {
         "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json",
-        },
+        "headers": CORS_HEADERS,
         "body": response.model_dump_json(),
     }

@@ -8,8 +8,20 @@ from qdrant_client.http.models import (
     GeoPoint,
 )
 from typing import TypedDict, Optional
+from .secret import secrets
+from .env import environment
 
-client = QdrantClient(host="host.docker.internal", port=6333)
+# localstack
+if environment == "localstack":
+    client = QdrantClient(host="host.docker.internal", port=6333)
+# prod
+else:
+    client = QdrantClient(
+        api_key=secrets["QDRANT_API_KEY"],
+        host=secrets["QDRANT_HOST"],
+        port=443,
+        check_compatibility=False,
+    )
 
 COLLECTION_NAME = "tokyo_landprice_rag"
 
