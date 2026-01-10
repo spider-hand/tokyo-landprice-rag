@@ -66,10 +66,31 @@ onMounted(() => {
   if (mapContainer.value) {
     map = new maplibregl.Map({
       container: mapContainer.value,
-      // @see: https://docs.carto.com/faqs/carto-basemaps
-      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-      center: [139.5803, 35.7023], // Tokyo
+      style: {
+        version: 8,
+        sources: {
+          'raster-tiles': {
+            type: 'raster',
+            tiles: [
+              `https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}`,
+            ],
+            tileSize: 512,
+            attribution:
+              '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+          },
+        },
+        layers: [
+          {
+            id: 'raster-tiles-layer',
+            type: 'raster',
+            source: 'raster-tiles',
+          },
+        ],
+      },
+      center: [139.5803, 35.7023],
       zoom: 10,
+      minZoom: 10,
+      maxZoom: 14,
     })
 
     map.on('load', () => {
