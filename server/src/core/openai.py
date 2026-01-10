@@ -72,16 +72,14 @@ def generate_with_llm(question: str, contexts: list[str]) -> str:
     prompt = f"""
         System:
         You are a land price analysis assistant.
-
-        User:
         First, determine whether the user's question is written in Japanese.
         Ignore numbers, coordinates, and symbols when determining the language.
-        Do not explain the language detection result.
-
         If it is Japanese, answer in Japanese.
         Otherwise, answer in English.
+        Do not explain or mention the language decision in your answer.
 
-        Use only the information provided below.
+        User:
+        Explain the land price level and residential characteristics based on the provided information.
         Be concise and factual.
         Do not make up any information that is not present in the data.
 
