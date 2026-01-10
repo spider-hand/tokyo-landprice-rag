@@ -33,8 +33,6 @@ class SearchIntent(TypedDict, total=False):
     require_top_1_percent_change_rate: bool
     require_bottom_1_percent_change_rate: bool
 
-    semantic_search: bool
-
 
 def build_filter(intent: SearchIntent) -> Optional[Filter]:
     must: list[FieldCondition] = []
@@ -63,11 +61,11 @@ def build_filter(intent: SearchIntent) -> Optional[Filter]:
             )
         )
 
-    if intent.get("land_usage"):
+    if intent.get("usage"):
         must.append(
             FieldCondition(
-                key="land_usage",
-                match=MatchValue(value=intent["land_usage"]),
+                key="usage",
+                match=MatchValue(value=intent["usage"]),
             )
         )
 

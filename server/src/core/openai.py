@@ -18,31 +18,35 @@ def embed(text: str) -> list[float]:
 
 def extract_intent(question: str) -> SearchIntent:
     prompt = f"""
-        以下のユーザーの質問から検索条件をJSON形式で抽出してください。
-        必ず有効なJSON形式のみを返してください。余分な説明やマークダウンは含めないでください。
+        Extract search filters from the following user question as a JSON object.
+        Return only valid JSON. Do not include explanations or markdown.
 
-        抽出対象:
-        - ward 市区町村は含めない（例: 千代田)
-        - station 駅名のみ（例: 半蔵門)
-        - usage 住宅, 店舗, 事務所, 銀行, 旅館, 給油所, 工場, 倉庫, 農地, 山林, 医院, 空地, 作業所, 原野, 用材, 雑林のいずれか
-        - time_to_station_max: 駅から徒歩何分以内という条件があれば、その分数を整数で検索条件に含める
+        Possible fields:
+        - ward: Japanese municipality name WITHOUT administrative suffix.
+                Remove 市, 区, 町, 村 from the name.
+                Examples:
+                    千代田区 → 千代田
+                    武蔵野市 → 武蔵野
+                    奥多摩町 → 奥多摩
+                    檜原村 → 檜原
+        - station: station name only (e.g. 半蔵門, 新宿)
+        - usage: one of [住宅, 店舗, 事務所, 銀行, 旅館, 給油所, 工場, 倉庫, 農地, 山林, 医院, 空地, 作業所, 原野, 用材, 雑林]
+        - time_to_station_max: maximum walking time to a station in minutes (integer)
 
-        - require_max_price: 最高価格を検索条件に含めるなら true
-        - require_min_price: 最低価格を検索条件に含めるなら true
-        - require_top_1_percent_price: 価格の上位1%を検索条件に含めるなら true
-        - require_bottom_1_percent_price: 価格の下位1%を検索条件に含めるなら true
+        - require_max_price: true if the user is asking for the highest land price
+        - require_min_price: true if the user is asking for the lowest land price
+        - require_top_1_percent_price: true if the user is asking for the top 1% land price
+        - require_bottom_1_percent_price: true if the user is asking for the bottom 1% land price
 
-        - require_max_change_rate: 最高変動率を検索条件に含めるなら true
-        - require_min_change_rate: 最低変動率を検索条件に含めるなら true
-        - require_top_1_percent_change_rate: 変動率の上位1%を検索条件に含めるなら true
-        - require_bottom_1_percent_change_rate: 変動率の下位1%を検索条件に含めるなら true
+        - require_max_change_rate: true if the user is asking for the highest change rate
+        - require_min_change_rate: true if the user is asking for the lowest change rate
+        - require_top_1_percent_change_rate: true if the user is asking for the top 1% change rate
+        - require_bottom_1_percent_change_rate: true if the user is asking for the bottom 1% change rate
 
-        - semantic_search: 意味検索が必要なら true
+        Do not include fields that are not mentioned in the question.
+        If no fields apply, return an empty JSON object.
 
-        質問に該当しない項目は含めないでください。
-        該当する項目がない場合は空のJSONオブジェクトを返してください。
-
-        質問:
+        Question:
         {question}
         """.strip()
 
@@ -66,15 +70,25 @@ def extract_intent(question: str) -> SearchIntent:
 
 def generate_with_llm(question: str, contexts: list[str]) -> str:
     prompt = f"""
-        以下の情報を参考に、質問に答えてください。
-        質問文が日本語でない場合は、英語で回答してください。
-        事実に基づいて簡潔に説明してください。
-        推測はしないでください。
+        System:
+        You are a land price analysis assistant.
 
-        情報:
+        User:
+        First, determine whether the user's question is written in Japanese.
+        Ignore numbers, coordinates, and symbols when determining the language.
+        Do not explain the language detection result.
+
+        If it is Japanese, answer in Japanese.
+        Otherwise, answer in English.
+
+        Use only the information provided below.
+        Be concise and factual.
+        Do not make up any information that is not present in the data.
+
+        Contexts:
         {"\n\n".join(contexts)}
 
-        質問:
+        Question:
         {question}
         """.strip()
 
