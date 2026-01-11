@@ -8,7 +8,7 @@ A Retrieval-Augmented Generation (RAG) application for exploring Tokyo land pric
 
 ## Demo
 
-<p> <strong><a href="https://tokyolandpriceai.com" target="_blank">tokyolandpriceai.com</a></strong> </p>
+**[tokyolandpriceai.com](https://tokyolandpriceai.com)**
 
 ### Example questions
 
@@ -54,7 +54,7 @@ Thanks for your understanding and contributions.
 
 ## Credits
 
-- Source: 国土数値情報 （地価公示データ）（国土交通省）https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-L01-2025.html
+- Source: 国土数値情報 （地価公示データ）(Ministry of Land, Infrastructure, Transport and Tourism) https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-L01-2025.html
 
   The original data has been processed and transformed for visualization purposes.
 

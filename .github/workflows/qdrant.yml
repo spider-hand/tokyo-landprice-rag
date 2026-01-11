@@ -13,6 +13,9 @@ jobs:
       run:
         working-directory: ./qdrant
 
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -22,5 +25,3 @@ jobs:
         run: flyctl config validate
       - name: Deploy to Fly.io
         run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

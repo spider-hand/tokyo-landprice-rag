@@ -4,6 +4,7 @@ on:
       - main
     paths:
       - "server/**"
+
 jobs:
   deploy-sam:
     runs-on: ubuntu-latest

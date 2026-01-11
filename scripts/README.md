@@ -5,12 +5,6 @@
 ### Prerequisites
 - [uv](https://docs.astral.sh/uv)
 
-### Initialize project
-
-```bash
-uv init
-```
-
 ### Create virtual environment
 
 ```bash
@@ -21,6 +15,12 @@ uv venv
 
 ```bash
 source .venv/bin/activate
+```
+
+### Install dependencies
+
+```bash
+uv sync
 ```
 
 ### Run script
