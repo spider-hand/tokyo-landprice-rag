@@ -3,6 +3,9 @@ import { Configuration } from '@/services'
 const useApi = () => {
   const apiConfig = new Configuration({
     basePath: import.meta.env.VITE_API_BASE_URL,
+    headers: {
+      'x-api-key': import.meta.env.VITE_PUBLIC_API_KEY,
+    },
   })
 
   return { apiConfig }

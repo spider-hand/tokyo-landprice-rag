@@ -32,8 +32,18 @@ Resources:
       StageName: !Ref Environment
       Cors:
         AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
-        AllowHeaders: "'Content-Type,Authorization'"
+        AllowHeaders: "'Content-Type,Authorization,x-api-key'"
         AllowOrigin: "'*'"
+      Auth:
+        ApiKeyRequired: false
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          Quota:
+            Limit: 5000
+            Period: MONTH
+          Throttle:
+            BurstLimit: 20
+            RateLimit: 5
   HealthCheckFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -54,6 +64,8 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /health
             Method: get
+            Auth:
+              ApiKeyRequired: true
   MessagesFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -74,3 +86,5 @@ Resources:
             RestApiId: !Ref ApiGateway
             Path: /messages
             Method: post
+            Auth:
+              ApiKeyRequired: true
