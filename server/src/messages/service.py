@@ -19,7 +19,7 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
         query_filter = None
 
         if lat is not None and lon is not None:
-            bbox_size = 1 if is_point else 500
+            bbox_size = 100 if is_point else 500
             query_filter = build_geo_filter(lat, lon, bbox_size)
             logger.info(
                 {
