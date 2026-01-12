@@ -1,6 +1,6 @@
 # Tokyo Land Price RAG
 
-<img width="3024" height="1964" alt="screenshot" src="https://github.com/user-attachments/assets/24726433-0883-410c-aeb6-d9a7c86f1c94" />
+<img width="3024" height="1964" alt="screenshot" src="https://github.com/user-attachments/assets/3ae0c6b7-8a9b-4abd-acd1-ad39f02bbc24" />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
