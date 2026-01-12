@@ -90,7 +90,11 @@ onMounted(() => {
       center: [139.5803, 35.7023],
       zoom: 10,
       minZoom: 10,
-      maxZoom: 14,
+      maxZoom: 16,
+      maxBounds: [
+        [138.8, 35.4],
+        [140.1, 35.95],
+      ],
     })
 
     map.on('load', () => {
