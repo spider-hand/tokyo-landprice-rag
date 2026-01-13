@@ -22,7 +22,7 @@ def get_secret() -> SecretDict:
         client = boto3.client(
             service_name=service_name,
             region_name=region_name,
-            endpoint_url="http://localstack-main:4566",
+            endpoint_url="http://localstack-tokyo-landprice-rag:4566",
         )
     # prod
     else:
