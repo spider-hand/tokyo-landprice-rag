@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import (
     Filter,
@@ -6,13 +7,17 @@ from qdrant_client.http.models import (
     Range,
     GeoBoundingBox,
     GeoPoint,
+    ScoredPoint,
 )
 from typing import TypedDict, Optional
 from .secret import secrets
 from .env import environment
 
+# script
+if environment is None:
+    client = QdrantClient(host="localhost", port=6333)
 # localstack
-if environment == "localstack":
+elif environment == "localstack":
     client = QdrantClient(host="host.docker.internal", port=6333)
 # prod
 else:
@@ -27,6 +32,12 @@ COLLECTION_NAME = "tokyo_landprice_rag"
 
 METERS_PER_DEG_LAT = 111000
 METERS_PER_DEG_LON = 91000
+
+
+@dataclass
+class RetrievalResult:
+    contexts: list[str]
+    hits: list[ScoredPoint]
 
 
 class SearchIntent(TypedDict, total=False):
@@ -136,3 +147,17 @@ def build_geo_filter(lat: float, lon: float, bbox_size_meters: float = 500) -> F
             ),
         ]
     )
+
+
+def retrieve_contexts(
+    vector: list[float], query_filter: Optional[Filter], limit: int = 5
+) -> RetrievalResult:
+    hits = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=vector,
+        query_filter=query_filter,
+        limit=limit,
+    ).points
+
+    contexts = [hit.payload["semantic_text"] for hit in hits]
+    return RetrievalResult(contexts=contexts, hits=hits)

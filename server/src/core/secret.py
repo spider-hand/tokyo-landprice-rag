@@ -1,4 +1,3 @@
-import boto3
 import json
 from functools import lru_cache
 from typing import TypedDict
@@ -16,6 +15,22 @@ def get_secret() -> SecretDict:
     secret_name = f"tokyo-landprice-rag-{environment}"
     service_name = "secretsmanager"
     region_name = "ap-northeast-1"
+
+    # script
+    if environment is None:
+        import os
+
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY must be set when running scripts")
+
+        return {
+            "OPENAI_API_KEY": api_key,
+            "QDRANT_API_KEY": "",
+            "QDRANT_HOST": "",
+        }
+
+    import boto3
 
     # localstack
     if environment == "localstack":

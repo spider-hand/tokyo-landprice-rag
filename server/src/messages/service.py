@@ -1,7 +1,7 @@
 from core.logger import logger
 from messages.model import PostMessageRequest, PostMessageResponse
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from core.qdrant import client, COLLECTION_NAME, build_filter, build_geo_filter
+from core.qdrant import build_filter, build_geo_filter, retrieve_contexts
 from core.openai import embed, extract_intent, generate_with_llm
 
 
@@ -39,15 +39,10 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
             )
             query_filter = build_filter(intent)
 
-        # Retrieve relevant information
-        hits = client.query_points(
-            collection_name=COLLECTION_NAME,
-            query=embed(message),
-            query_filter=query_filter,
-            limit=5,
-        ).points
+        vector = embed(message)
+        result = retrieve_contexts(vector, query_filter)
 
-        if not hits:
+        if not result.hits:
             if language == "ja":
                 return PostMessageResponse(
                     response="関連する情報が見つかりませんでした。"
@@ -57,10 +52,7 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
                     response="No relevant information was found."
                 )
 
-        # Build contexts
-        contexts = []
-
-        for hit in hits:
+        for hit in result.hits:
             logger.info(
                 {
                     "event": "retrieved_relevant_information",
@@ -68,10 +60,8 @@ def post_message_service(event: APIGatewayProxyEventModel) -> PostMessageRespons
                     "payload": hit.payload,
                 }
             )
-            contexts.append(hit.payload["semantic_text"])
 
-        # Generate answer
-        response = generate_with_llm(question=message, contexts=contexts)
+        response = generate_with_llm(question=message, contexts=result.contexts)
         logger.info({"event": "generate_with_llm", "response": response})
         return PostMessageResponse(response=response)
     except Exception as e:
